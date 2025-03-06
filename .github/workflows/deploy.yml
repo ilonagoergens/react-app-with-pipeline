@@ -20,7 +20,7 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-            ssh -o StrictHostKeyChecking=no ec2-user@your-ec2-ip << 'EOF'
+            ssh -o StrictHostKeyChecking=no ec2-user@18.153.14.166 << 'EOF'
                 cd /home/ubuntu/react_pipeline
                 git pull
                 npm install
