@@ -20,35 +20,28 @@ jobs:
 
       # Schritt 2: Deployment auf EC2
       - name: Deploy to ec2
-        run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@3.121.223.78 << 'EOF'
-            # Node.js installieren, falls nicht vorhanden
-            curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-            sudo apt-get install -y nodejs
+        run: | 
+          # SSH to EC2 instance (no need to specify -i because ssh-agent is managing the key)
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+          # Lade NVM und die Node.js-Version, die über NVM installiert wurde
+          export NVM_DIR="/home/ubuntu/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # NVM laden
+          nvm use v22.14.0  # Die spezifische Node.js-Version laden
 
-            # PM2 installieren, falls nicht vorhanden
-            sudo npm install -g pm2
+          # Überprüfe, ob Node.js und npm verfügbar sind
+          node -v  # Node.js-Version anzeigen
+          npm -v   # npm-Version anzeigen
+          
+          rm -rf /home/ubuntu/app
+          mkdir -p /home/ubuntu/app
+          cd /home/ubuntu/app
+          
+          git clone https://github.com/${{ github.repository }}.git .
+  
+          npm install
+          npm run build
 
-            # Repository klonen oder aktualisieren
-            cd /var/www
-            if [ ! -d "react-app-with-pipeline" ]; then
-              git clone https://github.com/${{ github.repository }} react-app-with-pipeline
-            else
-              cd react-app-with-pipeline
-              git pull origin main
-            fi
+          sudo mv /home/ubuntu/app/dist/* /var/www/html/
+          sudo service nginx restart
 
-            # Installiere Abhängigkeiten und baue die Anwendung
-            cd /var/www/react-app-with-pipeline
-            npm install
-            npm run build
-
-            # Kopiere den Inhalt des dist-Ordners in den Nginx-Webserver Ordner
-            sudo cp -r build/* /var/www/html/
-
-            # Stelle sicher, dass Nginx läuft
-            sudo systemctl restart nginx
-
-            # Optional: Nginx so konfigurieren, dass es beim Systemstart startet
-            sudo systemctl enable nginx
-            EOF
+          EOF
