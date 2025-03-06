@@ -19,7 +19,7 @@ jobs:
           ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
       # Schritt 2: Deployment auf EC2
-      - name: deploy to ec2
+      - name: Deploy to ec2
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@18.193.101.241 << 'EOF'
             # Node.js installieren, falls nicht vorhanden
@@ -27,9 +27,9 @@ jobs:
             sudo apt-get install -y nodejs
 
             # PM2 installieren, falls nicht vorhanden
-            npm install -g pm2
+            sudo npm install -g pm2
 
-            # Repository klonen (es wird immer neu geklont, wenn es nicht existiert)
+            # Repository klonen oder aktualisieren
             cd /var/www
             if [ ! -d "react-app-with-pipeline" ]; then
               git clone https://github.com/${{ github.repository }} react-app-with-pipeline
@@ -38,8 +38,15 @@ jobs:
               git pull origin main
             fi
 
+            # Installiere Abhängigkeiten und baue die Anwendung
             cd /var/www/react-app-with-pipeline
             npm install
             npm run build
-            pm2 restart all
+
+            # Starten/neu starten der App mit PM2
+            pm2 restart all || pm2 start npm --name "react-app" -- run start
+
+            # PM2 sicherstellen, dass es nach einem Neustart startet
+            pm2 startup systemd
+            pm2 save
           EOF
