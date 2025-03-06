@@ -43,10 +43,12 @@ jobs:
             npm install
             npm run build
 
-            # Starten/neu starten der App mit PM2
-            pm2 restart all || pm2 start npm --name "react-app" -- run start
+            # Kopiere den Inhalt des dist-Ordners in den Nginx-Webserver Ordner
+            sudo cp -r dist/* /var/www/html/
 
-            # PM2 sicherstellen, dass es nach einem Neustart startet
-            pm2 startup systemd
-            pm2 save
-          EOF
+            # Stelle sicher, dass Nginx läuft
+            sudo systemctl restart nginx
+
+            # Optional: Nginx so konfigurieren, dass es beim Systemstart startet
+            sudo systemctl enable nginx
+            EOF
