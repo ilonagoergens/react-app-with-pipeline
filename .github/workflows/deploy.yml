@@ -44,7 +44,7 @@ jobs:
             npm run build
 
             # Kopiere den Inhalt des dist-Ordners in den Nginx-Webserver Ordner
-            sudo cp -r dist/* /var/www/html/
+            sudo cp -r build/* /var/www/html/
 
             # Stelle sicher, dass Nginx läuft
             sudo systemctl restart nginx
