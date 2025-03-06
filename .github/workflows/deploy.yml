@@ -32,9 +32,9 @@ jobs:
           node -v  # Node.js-Version anzeigen
           npm -v   # npm-Version anzeigen
           
-          rm -rf /home/ubuntu/app
-          mkdir -p /home/ubuntu/app
-          cd /home/ubuntu/app
+          rm -rf /home/ubuntu/react-app-with-pipeline
+          mkdir -p /home/ubuntu/react-app-with-pipeline
+          cd /home/ubuntu/react-app-with-pipeline
           
           git clone https://github.com/${{ github.repository }}.git .
   
