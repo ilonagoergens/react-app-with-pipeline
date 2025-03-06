@@ -20,35 +20,11 @@ jobs:
 
       # Schritt 2: Deployment auf EC2
       - name: Deploy to EC2
-        run: | 
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-        
-          export NVM_DIR="/home/ubuntu/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          nvm use v16.15.0  # Die spezifische Node.js-Version laden (hier 16.15.0 als Beispiel)
-
-          # Node.js und npm Version prüfen
-          node -v
-          npm -v
-
-          # Installiere PM2 global
-          npm install -g pm2
-          
-          # Lösche den alten Ordner, falls vorhanden, und lege einen neuen an
-          rm -rf /home/ubuntu/react_pipeline
-          mkdir -p /home/ubuntu/react_pipeline
-          cd /home/ubuntu/react_pipeline
-          
-          # Klone das Repository von GitHub
-          git clone https://github.com/${{ github.repository }}.git .
-
-          # Installiere die npm-Abhängigkeiten
-          npm install
-
-          # Starte den Server mit PM2
-          pm2 restart react-app || pm2 start npm --name "react-app" -- run start --watch
-
-          # Stelle sicher, dass PM2 beim Neustart des Systems automatisch startet
-          pm2 startup systemd
-          pm2 save
+        run: |
+          ssh -i private_key -o StrictHostKeyChecking=no ubuntu@18.153.14.166 << 'EOF'
+            cd /var/www/react-app-with-pipeline
+            git pull origin main
+            npm install
+            npm run build
+            pm2 restart all
           EOF
