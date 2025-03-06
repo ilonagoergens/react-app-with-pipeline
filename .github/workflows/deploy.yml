@@ -21,7 +21,7 @@ jobs:
       # Schritt 2: Deployment auf EC2
       - name: deploy to ec2
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@18.153.14.166 << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@18.193.101.241 << 'EOF'
             # Node.js installieren, falls nicht vorhanden
             curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
             sudo apt-get install -y nodejs
